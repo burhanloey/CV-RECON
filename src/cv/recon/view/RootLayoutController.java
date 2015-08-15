@@ -17,9 +17,16 @@
 package cv.recon.view;
 
 import cv.recon.MainApp;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.layout.HBox;
 
 /**
  *
@@ -27,11 +34,25 @@ import javafx.fxml.Initializable;
  */
 public class RootLayoutController implements Initializable {
     
+    @FXML
+    private HBox hBox;
+    
     public MainApp mainApp;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+        initDisplay();
+    }
+    
+    private void initDisplay() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("InputDisplay.fxml"));
+            Parent inputDisplay = loader.load();
+            
+            hBox.getChildren().setAll(inputDisplay);
+        } catch (IOException ex) {
+            Logger.getLogger(RootLayoutController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void setMainApp(MainApp mainApp) {

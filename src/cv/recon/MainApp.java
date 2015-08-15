@@ -18,6 +18,7 @@ package cv.recon;
 
 import cv.recon.view.RootLayoutController;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -25,6 +26,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.opencv.core.Core;
 
 /**
  *
@@ -40,7 +42,24 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         
+        loadOpenCV();
         initRootLayout();
+    }
+    
+    private void loadOpenCV() {
+        try {
+            String path = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+            String dir = path.substring("/".length(), path.length() - MainApp.TITLE.length() - ".jar".length());
+            System.setProperty("java.library.path", dir + "/lib");
+            
+            final Field sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
+            sysPathsField.setAccessible(true);
+            sysPathsField.set(null, null);
+            
+            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void initRootLayout() {
