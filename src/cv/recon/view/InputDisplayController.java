@@ -47,8 +47,10 @@ public class InputDisplayController implements Initializable {
     @FXML
     private void startCamera(ActionEvent event) {
         Mat mat = new Mat();
+        
         vid.open(0);
         vid.read(mat);
+        vid.release();
         
         int width = mat.width();
         int height = mat.height();
@@ -62,8 +64,6 @@ public class InputDisplayController implements Initializable {
         
         WritableImage wim = SwingFXUtils.toFXImage(bufferedImage, null);
         inputView.setImage(wim);
-        
-        vid.release();
     }
     
     @FXML
