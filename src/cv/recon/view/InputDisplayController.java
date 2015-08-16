@@ -20,6 +20,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -43,37 +46,68 @@ public class InputDisplayController implements Initializable {
     private ImageView inputView;
     
     VideoCapture vid;
+    Timer timer;
+    Mat mat;
+    byte[] sourcePixels;
+    byte[] targetPixels;
+    BufferedImage bufferedImage;
+    WritableImage wim;
     
     @FXML
     private void startCamera(ActionEvent event) {
-        Mat mat = new Mat();
-        
         vid.open(0);
-        vid.read(mat);
-        vid.release();
         
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                vid.read(mat);
+                
+                Platform.runLater(() -> {
+                    updateInputView();
+                });
+            }
+        }, 0L, 100L);
+    }
+    
+    private void updateInputView() {
         int width = mat.width();
         int height = mat.height();
         int channels = mat.channels();
-        byte[] sourcePixels = new byte[width * height * channels];
+        if (sourcePixels == null) {
+            sourcePixels = new byte[width * height * channels];
+        }
         mat.get(0, 0, sourcePixels);
         
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-        final byte[] targetPixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
+        if (bufferedImage == null) {
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        }
+        targetPixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
         System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
         
-        WritableImage wim = SwingFXUtils.toFXImage(bufferedImage, null);
+        if (wim == null) {
+            wim = SwingFXUtils.toFXImage(bufferedImage, null);
+        } else {
+            SwingFXUtils.toFXImage(bufferedImage, wim);
+        }
         inputView.setImage(wim);
     }
     
     @FXML
     private void stopCamera(ActionEvent event) {
-        
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        if (vid.isOpened()) {
+            vid.release();
+        }
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         vid = new VideoCapture();
+        mat = new Mat();
     }    
     
 }

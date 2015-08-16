@@ -37,6 +37,7 @@ public class MainApp extends Application {
     public static final String TITLE = "CV-RECON";
     
     public Stage primaryStage;
+    private final boolean debug = true;
     
     @Override
     public void start(Stage primaryStage) {
@@ -48,13 +49,15 @@ public class MainApp extends Application {
     
     private void loadOpenCV() {
         try {
-            String path = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-            String dir = path.substring("/".length(), path.length() - MainApp.TITLE.length() - ".jar".length());
-            System.setProperty("java.library.path", dir + "/lib");
-            
-            final Field sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
-            sysPathsField.setAccessible(true);
-            sysPathsField.set(null, null);
+            if (!debug) {
+                String path = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+                String dir = path.substring("/".length(), path.length() - MainApp.TITLE.length() - ".jar".length());
+                System.setProperty("java.library.path", dir + "/lib");
+
+                final Field sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
+                sysPathsField.setAccessible(true);
+                sysPathsField.set(null, null);
+            }
             
             System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
