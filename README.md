@@ -6,7 +6,7 @@ Project CV-RECON: Computer Vision - Repetition Counter (name subject to change) 
 - OpenCV
 
 ### Compiling for Release Build
-Change 'debug' variable in MainApp.java to false, and remove JVM Args in Netbeans properties.
+Change 'debug' field in MainApp.java to false, and remove JVM Args in Netbeans properties.
 
 ### License
 GNU General Public License v3 (GPL-3)
