@@ -16,11 +16,10 @@
  */
 package cv.recon.view;
 
+import cv.recon.util.MatFXUtils;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
@@ -42,27 +41,12 @@ public class OutputDisplayController implements Initializable {
     BufferedImage bufferedImage;
     WritableImage writableImage;
     
+    /**
+     * Update output view after image processing.
+     * @param mat 
+     */
     public void updateView(Mat mat) {
-        int width = mat.width();
-        int height = mat.height();
-        int channels = mat.channels();
-        if (sourcePixels == null) {
-            sourcePixels = new byte[width * height * channels];
-        }
-        mat.get(0, 0, sourcePixels);
-        
-        if (bufferedImage == null) {
-            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-        }
-        targetPixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
-        System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
-        
-        if (writableImage == null) {
-            writableImage = SwingFXUtils.toFXImage(bufferedImage, null);
-        } else {
-            SwingFXUtils.toFXImage(bufferedImage, writableImage);
-        }
-        outputView.setImage(writableImage);
+        MatFXUtils.toFXImage(mat, sourcePixels, bufferedImage, targetPixels, writableImage, outputView);
     }
     
     @Override

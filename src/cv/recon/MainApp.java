@@ -48,6 +48,12 @@ public class MainApp extends Application {
         initRootLayout();
     }
     
+    /**
+     * Load OpenCV library for JNI.
+     * <p/>
+     * For debug build, the path to DLL file is in lib folder in class path.
+     * For release build, the path is in lib folder relative to the JAR file.
+     */
     private void loadOpenCV() {
         try {
             if (!debug) {
@@ -66,6 +72,12 @@ public class MainApp extends Application {
         }
     }
     
+    /**
+     * Initialize root layout.
+     * <p/>
+     * Override on close request to clear resources stream from OpenCV function
+     * before exiting.
+     */
     private void initRootLayout() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("view/RootLayout.fxml"));

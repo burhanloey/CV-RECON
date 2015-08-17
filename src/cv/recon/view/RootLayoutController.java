@@ -53,6 +53,12 @@ public class RootLayoutController implements Initializable {
     Timer timer;
     Mat mat;
     
+    /**
+     * Called from Start button.
+     * <p/>
+     * Start OpenCV video capture and update the display for input and output.
+     * @param event 
+     */
     @FXML
     private void start(ActionEvent event) {
         if (!vid.isOpened()) {
@@ -75,11 +81,19 @@ public class RootLayoutController implements Initializable {
         }
     }
     
+    /**
+     * Called from Stop button.
+     * @param event 
+     */
     @FXML
     private void stop(ActionEvent event) {
         dispose();
     }
     
+    /**
+     * Stop updating input and output display. Close OpenCV video stream
+     * resources.
+     */
     public void dispose() {
         if (timer != null) {
             timer.cancel();
@@ -90,6 +104,9 @@ public class RootLayoutController implements Initializable {
         }
     }
     
+    /**
+     * Initialize input display.
+     */
     private void initInputDisplay() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("InputDisplay.fxml"));
@@ -103,6 +120,9 @@ public class RootLayoutController implements Initializable {
         }
     }
     
+    /**
+     * Initialize output display.
+     */
     private void initOutputDisplay() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("OutputDisplay.fxml"));
@@ -125,6 +145,10 @@ public class RootLayoutController implements Initializable {
         initOutputDisplay();
     }
     
+    /**
+     * Called from MainApp to make reference back to itself.
+     * @param mainApp 
+     */
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
