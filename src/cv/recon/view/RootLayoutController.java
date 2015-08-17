@@ -20,13 +20,19 @@ import cv.recon.MainApp;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.HBox;
+import org.opencv.core.Mat;
+import org.opencv.highgui.VideoCapture;
 
 /**
  *
@@ -35,24 +41,88 @@ import javafx.scene.layout.HBox;
 public class RootLayoutController implements Initializable {
     
     @FXML
-    private HBox hBox;
+    private HBox inputBox;
+    @FXML
+    private HBox outputBox;
     
     public MainApp mainApp;
+    private InputDisplayController inputController;
+    private OutputDisplayController outputController;
     
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        initDisplay();
+    VideoCapture vid;
+    Timer timer;
+    Mat mat;
+    
+    @FXML
+    private void start(ActionEvent event) {
+        if (!vid.isOpened()) {
+            vid.open(0);
+
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    vid.read(mat);
+
+                    Platform.runLater(() -> {
+                        inputController.updateView(mat);
+                    });
+                    Platform.runLater(() -> {
+                        outputController.updateView(mat);
+                    });
+                }
+            }, 0L, 100L);
+        }
     }
     
-    private void initDisplay() {
+    @FXML
+    private void stop(ActionEvent event) {
+        dispose();
+    }
+    
+    public void dispose() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        if (vid.isOpened()) {
+            vid.release();
+        }
+    }
+    
+    private void initInputDisplay() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("InputDisplay.fxml"));
             Parent inputDisplay = loader.load();
             
-            hBox.getChildren().setAll(inputDisplay);
+            inputController = loader.getController();
+            
+            inputBox.getChildren().setAll(inputDisplay);
         } catch (IOException ex) {
             Logger.getLogger(RootLayoutController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void initOutputDisplay() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("OutputDisplay.fxml"));
+            Parent outputDisplay = loader.load();
+            
+            outputController = loader.getController();
+            
+            outputBox.getChildren().setAll(outputDisplay);
+        } catch (IOException ex) {
+            Logger.getLogger(RootLayoutController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        vid = new VideoCapture();
+        mat = new Mat();
+        
+        initInputDisplay();
+        initOutputDisplay();
     }
     
     public void setMainApp(MainApp mainApp) {

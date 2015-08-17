@@ -32,10 +32,10 @@ import org.opencv.core.Mat;
  *
  * @author Burhanuddin
  */
-public class InputDisplayController implements Initializable {
+public class OutputDisplayController implements Initializable {
 
     @FXML
-    private ImageView inputView;
+    private ImageView outputView;
     
     byte[] sourcePixels;
     byte[] targetPixels;
@@ -62,7 +62,7 @@ public class InputDisplayController implements Initializable {
         } else {
             SwingFXUtils.toFXImage(bufferedImage, writableImage);
         }
-        inputView.setImage(writableImage);
+        outputView.setImage(writableImage);
     }
     
     @Override
