@@ -19,7 +19,6 @@ package cv.recon.util;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Mat;
 
@@ -33,36 +32,28 @@ public class MatFXUtils {
      * Convert from OpenCV Mat to JavaFX WritableImage to be displayed in
      * ImageView.
      * @param mat Mat to be converted
-     * @param sourcePixels Array of byte of source pixels
-     * @param bufferedImage Buffered image to store temporary image
-     * @param targetPixels Array of byte for target pixels
-     * @param writableImage Converted image
-     * @param targetView Targeted ImageView
+     * @param writableImage Optional WritableImage, if non-null, the Mat will be
+     * written in this WritableImage
+     * @return A WritableImage to be used for JavaFX, return null if already
+     * supplied with WritableImage
      */
-    public static void toFXImage(Mat mat, byte[] sourcePixels, BufferedImage bufferedImage, byte[] targetPixels, WritableImage writableImage, ImageView targetView) {
+    public static WritableImage toFXImage(Mat mat, WritableImage writableImage) {
         int width = mat.width();
         int height = mat.height();
         int channels = mat.channels();
-        if (sourcePixels == null) {
-            sourcePixels = new byte[width * height * channels];
-        }
+        byte[] sourcePixels = new byte[width * height * channels];
         mat.get(0, 0, sourcePixels);
         
-        if (bufferedImage == null) {
-            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-        }
-        targetPixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        final byte[] targetPixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
         System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
         
         if (writableImage == null) {
-            writableImage = SwingFXUtils.toFXImage(bufferedImage, null);
+            WritableImage outputImage = SwingFXUtils.toFXImage(bufferedImage, null);
+            return outputImage;
         } else {
             SwingFXUtils.toFXImage(bufferedImage, writableImage);
+            return null;
         }
-        targetView.setImage(writableImage);
-    }
-    
-    public static void fromFXImage() {
-        // TODO
     }
 }

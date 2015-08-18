@@ -17,7 +17,6 @@
 package cv.recon.view;
 
 import cv.recon.util.MatFXUtils;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -25,6 +24,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * FXML Controller class
@@ -36,22 +36,35 @@ public class OutputDisplayController implements Initializable {
     @FXML
     private ImageView outputView;
     
-    byte[] sourcePixels;
-    byte[] targetPixels;
-    BufferedImage bufferedImage;
+    Mat dst;
     WritableImage writableImage;
     
     /**
      * Update output view after image processing.
-     * @param mat 
+     * @param mat Original Mat
      */
     public void updateView(Mat mat) {
-        MatFXUtils.toFXImage(mat, sourcePixels, bufferedImage, targetPixels, writableImage, outputView);
+        processImage(mat);
+        
+        if (writableImage == null) {
+            writableImage = MatFXUtils.toFXImage(dst, null);
+        } else {
+            MatFXUtils.toFXImage(dst, writableImage);
+        }
+        outputView.setImage(writableImage);
+    }
+    
+    /**
+     * Image processing.
+     * @param src Source Mat
+     */
+    private void processImage(Mat src) {
+        Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY);
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+        dst = new Mat();
     }    
     
 }

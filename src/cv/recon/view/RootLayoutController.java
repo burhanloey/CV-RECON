@@ -70,12 +70,14 @@ public class RootLayoutController implements Initializable {
                 public void run() {
                     vid.read(mat);
 
-                    Platform.runLater(() -> {
-                        inputController.updateView(mat);
-                    });
-                    Platform.runLater(() -> {
-                        outputController.updateView(mat);
-                    });
+                    if (!mat.empty()) {
+                        Platform.runLater(() -> {
+                            inputController.updateView(mat);
+                        });
+                        Platform.runLater(() -> {
+                            outputController.updateView(mat);
+                        });
+                    }
                 }
             }, 0L, 100L);
         }

@@ -17,7 +17,6 @@
 package cv.recon.view;
 
 import cv.recon.util.MatFXUtils;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -36,17 +35,19 @@ public class InputDisplayController implements Initializable {
     @FXML
     private ImageView inputView;
     
-    byte[] sourcePixels;
-    byte[] targetPixels;
-    BufferedImage bufferedImage;
     WritableImage writableImage;
     
     /**
      * Update input view without image processing.
-     * @param mat 
+     * @param mat Original Mat
      */
     public void updateView(Mat mat) {
-        MatFXUtils.toFXImage(mat, sourcePixels, bufferedImage, targetPixels, writableImage, inputView);
+        if (writableImage == null) {
+            writableImage = MatFXUtils.toFXImage(mat, null);
+        } else {
+            MatFXUtils.toFXImage(mat, writableImage);
+        }
+        inputView.setImage(writableImage);
     }
     
     @Override
