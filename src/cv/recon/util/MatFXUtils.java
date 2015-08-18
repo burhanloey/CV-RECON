@@ -44,7 +44,13 @@ public class MatFXUtils {
         byte[] sourcePixels = new byte[width * height * channels];
         mat.get(0, 0, sourcePixels);
         
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        BufferedImage bufferedImage;
+        if (mat.channels() > 1) {
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        } else {
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+        }
+        
         final byte[] targetPixels = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
         System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
         

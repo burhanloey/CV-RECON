@@ -16,6 +16,7 @@
  */
 package cv.recon.view;
 
+import cv.recon.util.CannyDetector;
 import cv.recon.util.MatFXUtils;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -24,7 +25,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 /**
  * FXML Controller class
@@ -36,7 +36,8 @@ public class OutputDisplayController implements Initializable {
     @FXML
     private ImageView outputView;
     
-    Mat dst;
+    CannyDetector canny;
+    Mat output;
     WritableImage writableImage;
     
     /**
@@ -47,9 +48,9 @@ public class OutputDisplayController implements Initializable {
         processImage(mat);
         
         if (writableImage == null) {
-            writableImage = MatFXUtils.toFXImage(dst, null);
+            writableImage = MatFXUtils.toFXImage(output, null);
         } else {
-            MatFXUtils.toFXImage(dst, writableImage);
+            MatFXUtils.toFXImage(output, writableImage);
         }
         outputView.setImage(writableImage);
     }
@@ -59,12 +60,13 @@ public class OutputDisplayController implements Initializable {
      * @param src Source Mat
      */
     private void processImage(Mat src) {
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY);
+        canny.detect(src, output);
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        dst = new Mat();
+        canny = new CannyDetector(25);
+        output = new Mat();
     }    
     
 }
