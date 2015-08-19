@@ -39,13 +39,13 @@ public class InputDisplayController implements Initializable {
     
     /**
      * Update input view without image processing.
-     * @param mat Original Mat
+     * @param src Original Mat
      */
-    public void updateView(Mat mat) {
+    public void updateView(Mat src) {
         if (writableImage == null) {
-            writableImage = MatFXUtils.toFXImage(mat, null);
+            writableImage = MatFXUtils.toFXImage(src, null);
         } else {
-            MatFXUtils.toFXImage(mat, writableImage);
+            MatFXUtils.toFXImage(src, writableImage);
         }
         inputView.setImage(writableImage);
     }

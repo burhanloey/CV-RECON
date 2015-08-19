@@ -16,7 +16,6 @@
  */
 package cv.recon.view;
 
-import cv.recon.util.CannyDetector;
 import cv.recon.util.MatFXUtils;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -25,6 +24,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.video.BackgroundSubtractorMOG;
 
 /**
  * FXML Controller class
@@ -36,23 +37,28 @@ public class OutputDisplayController implements Initializable {
     @FXML
     private ImageView outputView;
     
-    CannyDetector canny;
+    BackgroundSubtractorMOG bsmog;
+    Mat fgmask;
     Mat output;
     WritableImage writableImage;
     
     /**
      * Update output view after image processing.
-     * @param mat Original Mat
+     * @param src Original Mat
      */
-    public void updateView(Mat mat) {
-        processImage(mat);
-        
-        if (writableImage == null) {
-            writableImage = MatFXUtils.toFXImage(output, null);
-        } else {
-            MatFXUtils.toFXImage(output, writableImage);
+    public void updateView(Mat src) {
+        if (!src.empty()) {
+            processImage(src);
         }
-        outputView.setImage(writableImage);
+
+        if (!output.empty()) {
+            if (writableImage == null) {
+                writableImage = MatFXUtils.toFXImage(output, null);
+            } else {
+                MatFXUtils.toFXImage(output, writableImage);
+            }
+            outputView.setImage(writableImage);
+        }
     }
     
     /**
@@ -60,12 +66,23 @@ public class OutputDisplayController implements Initializable {
      * @param src Source Mat
      */
     private void processImage(Mat src) {
-        canny.detect(src, output);
+        if (bsmog != null) {
+            bsmog.apply(src, fgmask);
+            output.setTo(new Scalar(0));
+            src.copyTo(output, fgmask);
+        }
+    }
+    
+    /**
+     * Start background subtraction using first frame as background frame.
+     */
+    public void startBackgroundSubtraction() {
+        bsmog = new BackgroundSubtractorMOG();
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        canny = new CannyDetector(25);
+        fgmask = new Mat();
         output = new Mat();
     }    
     

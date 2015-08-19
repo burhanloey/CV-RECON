@@ -51,7 +51,7 @@ public class RootLayoutController implements Initializable {
     
     VideoCapture vid;
     Timer timer;
-    Mat mat;
+    Mat src;
     
     /**
      * Called from Start button.
@@ -68,19 +68,28 @@ public class RootLayoutController implements Initializable {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    vid.read(mat);
+                    vid.read(src);
 
-                    if (!mat.empty()) {
+                    if (!src.empty()) {
                         Platform.runLater(() -> {
-                            inputController.updateView(mat);
+                            inputController.updateView(src);
                         });
                         Platform.runLater(() -> {
-                            outputController.updateView(mat);
+                            outputController.updateView(src);
                         });
                     }
                 }
             }, 0L, 100L);
         }
+    }
+    
+    /**
+     * Called from 'Capture' button.
+     * @param event 
+     */
+    @FXML
+    private void capture(ActionEvent event) {
+        outputController.startBackgroundSubtraction();
     }
     
     /**
@@ -141,7 +150,7 @@ public class RootLayoutController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         vid = new VideoCapture();
-        mat = new Mat();
+        src = new Mat();
         
         initInputDisplay();
         initOutputDisplay();
