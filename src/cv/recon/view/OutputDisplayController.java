@@ -24,8 +24,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.BackgroundSubtractorMOG2;
 
@@ -40,9 +43,11 @@ public class OutputDisplayController implements Initializable {
     private ImageView outputView;
     
     BackgroundSubtractorMOG2 bsmog;
-    Mat fgmask;
+    FeatureDetector detector;
+    Mat fgMask;
     Mat kernel;
     Mat output;
+    MatOfKeyPoint keyPoints;
     WritableImage writableImage;
     
     /**
@@ -69,14 +74,24 @@ public class OutputDisplayController implements Initializable {
      * @param src Source Mat
      */
     private void processImage(Mat src) {
+        subtractBackground(src);
+        detector.detect(src, keyPoints, fgMask);
+        Features2d.drawKeypoints(src, keyPoints, output);
+    }
+    
+    /**
+     * Subtract background using BackgroundSubtractorMOG2
+     * @param src Source Mat
+     */
+    private void subtractBackground(Mat src) {
         if (bsmog != null) {
-            bsmog.apply(src, fgmask);
+            bsmog.apply(src, fgMask);
             
-            Imgproc.erode(fgmask, fgmask, kernel);
-            Imgproc.dilate(fgmask, fgmask, kernel);
+            Imgproc.erode(fgMask, fgMask, kernel);
+            Imgproc.dilate(fgMask, fgMask, kernel);
             
             output.setTo(new Scalar(0));
-            src.copyTo(output, fgmask);
+            src.copyTo(output, fgMask);
         }
     }
     
@@ -89,10 +104,12 @@ public class OutputDisplayController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        fgmask = new Mat();
+        fgMask = new Mat();
         output = new Mat();
+        keyPoints = new MatOfKeyPoint();
         
         kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(10, 10));
+        detector = FeatureDetector.create(FeatureDetector.SURF);
     }    
     
 }
