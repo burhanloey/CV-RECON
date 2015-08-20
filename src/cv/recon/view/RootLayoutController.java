@@ -32,7 +32,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.HBox;
 import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 
 /**
