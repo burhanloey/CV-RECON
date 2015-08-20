@@ -25,7 +25,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
-import org.opencv.video.BackgroundSubtractorMOG;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.video.BackgroundSubtractorMOG2;
 
 /**
  * FXML Controller class
@@ -37,8 +39,9 @@ public class OutputDisplayController implements Initializable {
     @FXML
     private ImageView outputView;
     
-    BackgroundSubtractorMOG bsmog;
+    BackgroundSubtractorMOG2 bsmog;
     Mat fgmask;
+    Mat kernel;
     Mat output;
     WritableImage writableImage;
     
@@ -68,6 +71,10 @@ public class OutputDisplayController implements Initializable {
     private void processImage(Mat src) {
         if (bsmog != null) {
             bsmog.apply(src, fgmask);
+            
+            Imgproc.erode(fgmask, fgmask, kernel);
+            Imgproc.dilate(fgmask, fgmask, kernel);
+            
             output.setTo(new Scalar(0));
             src.copyTo(output, fgmask);
         }
@@ -77,13 +84,15 @@ public class OutputDisplayController implements Initializable {
      * Start background subtraction using first frame as background frame.
      */
     public void startBackgroundSubtraction() {
-        bsmog = new BackgroundSubtractorMOG();
+        bsmog = new BackgroundSubtractorMOG2(100, 75f, false);
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         fgmask = new Mat();
         output = new Mat();
+        
+        kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(10, 10));
     }    
     
 }
