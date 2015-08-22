@@ -26,14 +26,20 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.BackgroundSubtractorMOG2;
 
@@ -50,10 +56,17 @@ public class OutputDisplayController implements Initializable {
     List<MatOfPoint> contours;
     BackgroundSubtractorMOG2 bsmog;
     FeatureDetector detector;
+    DescriptorExtractor orbExtractor;
+    DescriptorMatcher bruteForceMatcher;
+    Mat face;
     Mat fgMask;
     Mat kernel;
     Mat output;
-    MatOfKeyPoint keyPoints;
+    Mat faceDesc;
+    Mat srcDesc;
+    MatOfDMatch dMatch;
+    MatOfKeyPoint faceKeyPoints;
+    MatOfKeyPoint srcKeyPoints;
     WritableImage writableImage;
     
     /**
@@ -80,7 +93,22 @@ public class OutputDisplayController implements Initializable {
      * @param src Source Mat
      */
     private void processImage(Mat src) {
-        subtractBackground(src);
+//        subtractBackground(src);
+        if (!src.empty()) {
+            if (output.empty()) {
+                output = new Mat(new Size(face.width() + src.width(),
+                        face.height() + src.height()),
+                        CvType.CV_8U);
+            }
+            
+            detector.detect(src, srcKeyPoints);
+            orbExtractor.compute(src, srcKeyPoints, srcDesc);
+            
+            bruteForceMatcher.match(faceDesc, srcDesc, dMatch);
+            
+            output.setTo(new Scalar(0));
+            Features2d.drawMatches(face, faceKeyPoints, src, srcKeyPoints, dMatch, output);
+        }
     }
     
     /**
@@ -183,13 +211,23 @@ public class OutputDisplayController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        face = Highgui.imread("muka.jpg");
         fgMask = new Mat();
         output = new Mat();
-        keyPoints = new MatOfKeyPoint();
+        faceDesc = new Mat();
+        srcDesc = new Mat();
+        dMatch = new MatOfDMatch();
         contours = new ArrayList<>();
+        faceKeyPoints = new MatOfKeyPoint();
+        srcKeyPoints = new MatOfKeyPoint();
         
         kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(10, 10));
         detector = FeatureDetector.create(FeatureDetector.ORB);
+        orbExtractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+        bruteForceMatcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+        
+        detector.detect(face, faceKeyPoints);
+        orbExtractor.compute(face, faceKeyPoints, faceDesc);
     }    
     
 }
