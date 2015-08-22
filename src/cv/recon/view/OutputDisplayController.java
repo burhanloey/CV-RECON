@@ -18,17 +18,22 @@ package cv.recon.view;
 
 import cv.recon.util.MatFXUtils;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
-import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.BackgroundSubtractorMOG2;
 
@@ -42,6 +47,7 @@ public class OutputDisplayController implements Initializable {
     @FXML
     private ImageView outputView;
     
+    List<MatOfPoint> contours;
     BackgroundSubtractorMOG2 bsmog;
     FeatureDetector detector;
     Mat fgMask;
@@ -75,8 +81,6 @@ public class OutputDisplayController implements Initializable {
      */
     private void processImage(Mat src) {
         subtractBackground(src);
-        detector.detect(src, keyPoints, fgMask);
-        Features2d.drawKeypoints(src, keyPoints, output);
     }
     
     /**
@@ -90,9 +94,84 @@ public class OutputDisplayController implements Initializable {
             Imgproc.erode(fgMask, fgMask, kernel);
             Imgproc.dilate(fgMask, fgMask, kernel);
             
+            contours.clear();
+            Imgproc.findContours(fgMask,
+                    contours,
+                    new Mat(),
+                    Imgproc.RETR_TREE,
+                    Imgproc.CHAIN_APPROX_NONE);
+            
+            List<Rect> rectangles = new ArrayList<>();
+            contours.stream()
+                    .map((contour) -> Imgproc.boundingRect(contour))
+                    .forEach((rect) -> {
+                rectangles.add(rect);
+            });
+            
+            combineOverlappingRectangles(rectangles);
+            
             output.setTo(new Scalar(0));
-            src.copyTo(output, fgMask);
+            src.copyTo(output);
+            rectangles.stream().forEach((rect) -> {
+                Core.rectangle(output,
+                        new Point(rect.x, rect.y),
+                        new Point(rect.x + rect.width, rect.y + rect.height),
+                        new Scalar(0, 255, 0));
+            });
         }
+    }
+    
+    /**
+     * Combine overlapping rectangles.
+     * @param rectangles A list of rectangles
+     */
+    private void combineOverlappingRectangles(List<Rect> rectangles) {
+        boolean stillOverlap;
+        
+        do{
+            stillOverlap = false;
+            
+            for (int i = 0; i < rectangles.size(); i++) {
+                Rect rectA = rectangles.get(i);
+                
+                for (int j = 0; j < rectangles.size(); j++) {
+                    Rect rectAClone = rectA.clone();
+                    Rect rectB = rectangles.get(j);
+                    
+                    if (rectA.equals(rectB)) {
+                        continue;
+                    }
+                    
+                    if (isOverlap(rectA, rectB)) {
+                        rectA.x = Math.min(rectA.x, rectB.x);
+                        rectA.y = Math.min(rectA.y, rectB.y);
+                        rectA.width = Math.max(rectAClone.x + rectAClone.width,
+                                rectB.x + rectB.width);
+                        rectA.width -= rectA.x;
+                        rectA.height = Math.max(rectAClone.y + rectAClone.height,
+                                rectB.y + rectB.height);
+                        rectA.height -= rectA.y;
+                        
+                        rectangles.remove(rectB);
+                        
+                        stillOverlap = true;
+                    }
+                }
+            }
+        } while (stillOverlap);
+    }
+    
+    /**
+     * Check if two rectangles overlap.
+     * @param a First rectangle
+     * @param b Second rectangle
+     * @return A boolean stating whether two rectangles overlap.
+     */
+    private boolean isOverlap(Rect a, Rect b) {
+        return a.x <= (b.x + b.width) &&
+               (a.x + a.width) >= b.x &&
+               a.y <= (b.y + b.height) &&
+               (a.y + a.height) >= b.y;
     }
     
     /**
@@ -107,9 +186,10 @@ public class OutputDisplayController implements Initializable {
         fgMask = new Mat();
         output = new Mat();
         keyPoints = new MatOfKeyPoint();
+        contours = new ArrayList<>();
         
         kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(10, 10));
-        detector = FeatureDetector.create(FeatureDetector.SURF);
+        detector = FeatureDetector.create(FeatureDetector.ORB);
     }    
     
 }
