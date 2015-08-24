@@ -161,6 +161,10 @@ public class OutputDisplayController implements Initializable {
         bsmog = new BackgroundSubtractorMOG2(100, 75f, false);
     }
     
+    /**
+     * Return non-zero pixel count of foreground mask.
+     * @return Non-zero pixel count
+     */
     public int getNonZeroPixelCount() {
         return nonZeroCount;
     }

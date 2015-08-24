@@ -50,6 +50,9 @@ public class ChartController implements Initializable {
     long elapsedTime;
     Timer timer;
     
+    /**
+     * Start timer that run a new thread to update chart.
+     */
     public void startTimer() {
         list.clear();
         startTime = System.nanoTime();
@@ -68,6 +71,9 @@ public class ChartController implements Initializable {
         }, 0, 100);
     }
     
+    /**
+     * Stop timer
+     */
     public void stopTimer() {
         if (timer != null) {
             timer.cancel();
@@ -75,30 +81,42 @@ public class ChartController implements Initializable {
         }
     }
     
+    /**
+     * Add non-zero pixel count to chart.
+     * @param pixelCount Non-zero pixel count
+     */
     private void add(int pixelCount) {
         list.add(new XYChart.Data<>(elapsedTime, pixelCount));
         
         clearOldData();
     }
     
+    /**
+     * Remove earliest data to limit the graph to only display a maximum
+     * amount of data
+     */
     private void clearOldData() {
         if (list.size() > 50) {
             list.remove(0);
         }
     }
     
+    /**
+     * Called from root layout to make reference to output display controller.
+     * @param outputController 
+     */
     public void setOutputController(OutputDisplayController outputController) {
         this.outputController = outputController;
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        xAxis.setForceZeroInRange(false);
-        
         list = FXCollections.observableArrayList();
-        series = new XYChart.Series<>("Start point", list);
         
+        series = new XYChart.Series<>("Start point", list);
         lineChart.getData().add(series);
+        
+        xAxis.setForceZeroInRange(false);
     }    
     
 }
