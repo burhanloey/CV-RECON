@@ -51,24 +51,26 @@ public class ChartController implements Initializable {
     Timer timer;
     
     /**
-     * Start timer that run a new thread to update chart.
+     * Start timer to run a new thread that updates chart.
      */
     public void startTimer() {
-        list.clear();
-        startTime = System.nanoTime();
-        
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                elapsedTime = System.nanoTime() - startTime;
-                elapsedTime = elapsedTime / 1000000;
-                
-                Platform.runLater(() -> {
-                    add(outputController.getNonZeroPixelCount());
-                });
-            }
-        }, 0, 100);
+        if (timer == null) {
+            list.clear();
+            startTime = System.nanoTime();
+
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    elapsedTime = System.nanoTime() - startTime;
+                    elapsedTime = elapsedTime / 1000000;
+
+                    Platform.runLater(() -> {
+                        add(outputController.getNonZeroPixelCount());
+                    });
+                }
+            }, 0, 100);
+        }
     }
     
     /**

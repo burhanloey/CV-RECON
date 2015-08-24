@@ -54,6 +54,7 @@ public class OutputDisplayController implements Initializable {
     Mat output;
     WritableImage writableImage;
     int nonZeroCount;
+    boolean isFirstFrame;
     
     /**
      * Update output view after image processing.
@@ -96,7 +97,12 @@ public class OutputDisplayController implements Initializable {
             output.setTo(new Scalar(0));
             src.copyTo(output, fgMask);
             
-            nonZeroCount = Core.countNonZero(fgMask);
+            if (isFirstFrame) {
+                nonZeroCount = 0;
+                isFirstFrame = false;
+            } else {
+                nonZeroCount = Core.countNonZero(fgMask);
+            }
             nonZeroLabel.setText("" + nonZeroCount);
         }
     }
@@ -159,6 +165,7 @@ public class OutputDisplayController implements Initializable {
      */
     public void startBackgroundSubtraction() {
         bsmog = new BackgroundSubtractorMOG2(100, 75f, false);
+        isFirstFrame = true;
     }
     
     /**
