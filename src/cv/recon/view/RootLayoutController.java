@@ -44,10 +44,13 @@ public class RootLayoutController implements Initializable {
     private HBox inputBox;
     @FXML
     private HBox outputBox;
+    @FXML
+    private HBox chartBox;
     
     public MainApp mainApp;
     private InputDisplayController inputController;
     private OutputDisplayController outputController;
+    private ChartController chartController;
     
     VideoCapture vid;
     Timer timer;
@@ -89,6 +92,7 @@ public class RootLayoutController implements Initializable {
      */
     @FXML
     private void capture(ActionEvent event) {
+        chartController.startTimer();
         outputController.startBackgroundSubtraction();
     }
     
@@ -113,6 +117,7 @@ public class RootLayoutController implements Initializable {
         if (vid.isOpened()) {
             vid.release();
         }
+        chartController.stopTimer();
     }
     
     /**
@@ -147,6 +152,23 @@ public class RootLayoutController implements Initializable {
         }
     }
     
+    /**
+     * Initialize chart.
+     */
+    private void initChart() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Chart.fxml"));
+            Parent chart = loader.load();
+            
+            chartController = loader.getController();
+            chartController.setOutputController(outputController);
+            
+            chartBox.getChildren().setAll(chart);
+        } catch (IOException ex) {
+            Logger.getLogger(RootLayoutController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         vid = new VideoCapture();
@@ -154,6 +176,7 @@ public class RootLayoutController implements Initializable {
         
         initInputDisplay();
         initOutputDisplay();
+        initChart();
     }
     
     /**

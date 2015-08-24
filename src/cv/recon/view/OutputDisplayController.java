@@ -53,6 +53,7 @@ public class OutputDisplayController implements Initializable {
     Mat kernel;
     Mat output;
     WritableImage writableImage;
+    int nonZeroCount;
     
     /**
      * Update output view after image processing.
@@ -95,8 +96,8 @@ public class OutputDisplayController implements Initializable {
             output.setTo(new Scalar(0));
             src.copyTo(output, fgMask);
             
-            String nonZeroCount = "" + Core.countNonZero(fgMask);
-            nonZeroLabel.setText(nonZeroCount);
+            nonZeroCount = Core.countNonZero(fgMask);
+            nonZeroLabel.setText("" + nonZeroCount);
         }
     }
     
@@ -158,6 +159,10 @@ public class OutputDisplayController implements Initializable {
      */
     public void startBackgroundSubtraction() {
         bsmog = new BackgroundSubtractorMOG2(100, 75f, false);
+    }
+    
+    public int getNonZeroPixelCount() {
+        return nonZeroCount;
     }
     
     @Override
