@@ -28,6 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import cv.recon.util.Math;
 
 /**
  * FXML Controller class
@@ -44,8 +45,10 @@ public class ChartController implements Initializable {
     private LineChart<Number, Number> lineChart;
     
     OutputDisplayController outputController;
-    ObservableList<XYChart.Data<Number, Number>> list;
-    XYChart.Series<Number, Number> series;
+    ObservableList<XYChart.Data<Number, Number>> nonZeroCountValues;
+    XYChart.Series<Number, Number> nonZeroCountSeries;
+    ObservableList<XYChart.Data<Number, Number>> meanValues;
+    XYChart.Series<Number, Number> meanSeries;
     long startTime;
     long elapsedTime;
     Timer timer;
@@ -55,7 +58,7 @@ public class ChartController implements Initializable {
      */
     public void startTimer() {
         if (timer == null) {
-            list.clear();
+            nonZeroCountValues.clear();
             startTime = System.nanoTime();
 
             timer = new Timer();
@@ -66,7 +69,7 @@ public class ChartController implements Initializable {
                     elapsedTime = elapsedTime / 1000000;
 
                     Platform.runLater(() -> {
-                        add(outputController.getNonZeroPixelCount());
+                        addNonZeroCount(outputController.getNonZeroPixelCount());
                     });
                 }
             }, 0, 100);
@@ -85,12 +88,13 @@ public class ChartController implements Initializable {
     
     /**
      * Add non-zero pixel count to chart.
-     * @param pixelCount Non-zero pixel count
+     * @param nonZeroCount Non-zero pixel count
      */
-    private void add(int pixelCount) {
-        list.add(new XYChart.Data<>(elapsedTime, pixelCount));
+    private void addNonZeroCount(int nonZeroCount) {
+        nonZeroCountValues.add(new XYChart.Data<>(elapsedTime, nonZeroCount));
         
         clearOldData();
+        calculateMean();
     }
     
     /**
@@ -98,8 +102,25 @@ public class ChartController implements Initializable {
      * amount of data
      */
     private void clearOldData() {
-        if (list.size() > 50) {
-            list.remove(0);
+        if (nonZeroCountValues.size() > 50) {
+            nonZeroCountValues.remove(0);
+        }
+    }
+    
+    /**
+     * Calculate mean value and update the chart
+     */
+    private void calculateMean() {
+        if (!nonZeroCountValues.isEmpty()) {
+            double mean = Math.mean(nonZeroCountValues);
+            Number start = nonZeroCountValues.get(0).getXValue();
+
+            if (meanValues.isEmpty()) {
+                meanValues.add(new XYChart.Data<>(start, mean));
+            } else {
+                Number end = nonZeroCountValues.get(nonZeroCountValues.size() - 1).getXValue();
+                meanValues.setAll(new XYChart.Data<>(start, mean), new XYChart.Data<>(end, mean));
+            }
         }
     }
     
@@ -113,10 +134,13 @@ public class ChartController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        list = FXCollections.observableArrayList();
+        nonZeroCountValues = FXCollections.observableArrayList();
+        nonZeroCountSeries = new XYChart.Series<>("Start point", nonZeroCountValues);
+        lineChart.getData().add(nonZeroCountSeries);
         
-        series = new XYChart.Series<>("Start point", list);
-        lineChart.getData().add(series);
+        meanValues = FXCollections.observableArrayList();
+        meanSeries = new XYChart.Series<>("Mean", meanValues);
+        lineChart.getData().add(meanSeries);
         
         xAxis.setForceZeroInRange(false);
     }    
