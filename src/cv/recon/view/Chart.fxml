@@ -12,12 +12,8 @@
    <children>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Label text="0">
-               <font>
-                  <Font name="System Bold" size="50.0" />
-               </font>
-            </Label>
-            <LineChart fx:id="lineChart" animated="false" createSymbols="false" prefHeight="400.0" prefWidth="600.0" title="Non Zero Pixel Count">
+            <Label fx:id="countLabel" text="0" />
+            <LineChart fx:id="lineChart" animated="false" createSymbols="false" prefHeight="400.0" prefWidth="500.0" title="Non Zero Pixel Count">
               <xAxis>
                 <NumberAxis side="BOTTOM" fx:id="xAxis" />
               </xAxis>

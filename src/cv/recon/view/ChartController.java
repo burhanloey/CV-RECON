@@ -29,6 +29,8 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import cv.recon.util.Math;
+import cv.recon.util.Position;
+import javafx.scene.control.Label;
 
 /**
  * FXML Controller class
@@ -37,6 +39,8 @@ import cv.recon.util.Math;
  */
 public class ChartController implements Initializable {
 
+    @FXML
+    private Label countLabel;
     @FXML
     private NumberAxis xAxis;
     @FXML
@@ -51,13 +55,17 @@ public class ChartController implements Initializable {
     XYChart.Series<Number, Number> meanSeries;
     long startTime;
     long elapsedTime;
+    long count;
     Timer timer;
+    Position currentPosition;
     
     /**
      * Start timer to run a new thread that updates chart.
      */
     public void startTimer() {
         if (timer == null) {
+            count = 0;
+            currentPosition = Position.CLOSE_TO_INITIAL;
             nonZeroCountValues.clear();
             startTime = System.nanoTime();
 
@@ -88,6 +96,7 @@ public class ChartController implements Initializable {
     
     /**
      * Add non-zero pixel count to chart.
+     * 
      * @param nonZeroCount Non-zero pixel count
      */
     private void addNonZeroCount(int nonZeroCount) {
@@ -113,19 +122,57 @@ public class ChartController implements Initializable {
     private void calculateMean() {
         if (!nonZeroCountValues.isEmpty()) {
             double mean = Math.mean(nonZeroCountValues);
-            Number start = nonZeroCountValues.get(0).getXValue();
-
-            if (meanValues.isEmpty()) {
-                meanValues.add(new XYChart.Data<>(start, mean));
-            } else {
-                Number end = nonZeroCountValues.get(nonZeroCountValues.size() - 1).getXValue();
-                meanValues.setAll(new XYChart.Data<>(start, mean), new XYChart.Data<>(end, mean));
-            }
+            
+            checkRepetition(mean);
+            setMeanOnChart(mean);
+        }
+    }
+    
+    /**
+     * Check if there is a change in position according to mean value. If yes, 
+     * then it is considered a repetition, thus increasing the counter.
+     * 
+     * @param mean Mean value
+     */
+    private void checkRepetition(double mean) {
+        double currentValue = nonZeroCountValues
+                                .get(nonZeroCountValues.size() - 1) // last position
+                                .getYValue()
+                                .doubleValue();
+        
+        Position newPos;
+        if (currentValue > mean) {
+            newPos = Position.AWAY_FROM_INITIAL;
+        } else {
+            newPos = Position.CLOSE_TO_INITIAL;
+        }
+        
+        if (!currentPosition.equals(newPos)) {
+            currentPosition = newPos;
+            count++;
+            countLabel.setText("" + count);
+        }
+    }
+    
+    /**
+     * Add mean series on non-zero pixel count chart.
+     * 
+     * @param mean Mean value
+     */
+    private void setMeanOnChart(double mean) {
+        Number start = nonZeroCountValues.get(0).getXValue();
+            
+        if (meanValues.isEmpty()) {
+            meanValues.add(new XYChart.Data<>(start, mean));
+        } else {
+            Number end = nonZeroCountValues.get(nonZeroCountValues.size() - 1).getXValue();
+            meanValues.setAll(new XYChart.Data<>(start, mean), new XYChart.Data<>(end, mean));
         }
     }
     
     /**
      * Called from root layout to make reference to output display controller.
+     * 
      * @param outputController 
      */
     public void setOutputController(OutputDisplayController outputController) {
