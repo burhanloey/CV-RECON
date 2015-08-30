@@ -16,7 +16,7 @@
  */
 package cv.recon;
 
-import cv.recon.view.RootLayoutController;
+import cv.recon.controller.RootLayoutController;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
@@ -36,6 +36,7 @@ import org.opencv.core.Core;
 public class MainApp extends Application {
     
     public static final String TITLE = "CV-RECON";
+    public static final String VIEW_DIR = "/cv/recon/view/";
     
     public Stage primaryStage;
     private final boolean debug = true;
@@ -80,7 +81,7 @@ public class MainApp extends Application {
      */
     private void initRootLayout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("view/RootLayout.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(VIEW_DIR + "RootLayout.fxml"));
             Parent root = loader.load();
 
             Scene scene = new Scene(root);

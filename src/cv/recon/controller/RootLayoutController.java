@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cv.recon.view;
+package cv.recon.controller;
 
 import cv.recon.MainApp;
 import java.io.IOException;
@@ -125,7 +125,7 @@ public class RootLayoutController implements Initializable {
      */
     private void initInputDisplay() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("InputDisplay.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(MainApp.VIEW_DIR + "InputDisplay.fxml"));
             Parent inputDisplay = loader.load();
             
             inputController = loader.getController();
@@ -141,7 +141,7 @@ public class RootLayoutController implements Initializable {
      */
     private void initOutputDisplay() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("OutputDisplay.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(MainApp.VIEW_DIR + "OutputDisplay.fxml"));
             Parent outputDisplay = loader.load();
             
             outputController = loader.getController();
@@ -157,7 +157,7 @@ public class RootLayoutController implements Initializable {
      */
     private void initChart() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Chart.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(MainApp.VIEW_DIR + "Chart.fxml"));
             Parent chart = loader.load();
             
             chartController = loader.getController();
