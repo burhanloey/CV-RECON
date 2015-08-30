@@ -35,7 +35,7 @@ public class InputDisplayController implements Initializable {
     @FXML
     private ImageView inputView;
     
-    WritableImage writableImage;
+    private WritableImage writableImage;
     
     /**
      * Update input view without image processing.

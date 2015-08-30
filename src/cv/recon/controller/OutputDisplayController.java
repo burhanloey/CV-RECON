@@ -18,7 +18,6 @@ package cv.recon.controller;
 
 import cv.recon.util.MatFXUtils;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -28,7 +27,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -47,14 +45,13 @@ public class OutputDisplayController implements Initializable {
     @FXML
     private Label nonZeroLabel;
     
-    List<MatOfPoint> contours;
-    BackgroundSubtractorMOG2 bsmog;
-    Mat fgMask;
-    Mat kernel;
-    Mat output;
-    WritableImage writableImage;
-    int nonZeroCount;
-    boolean isFirstFrame;
+    private BackgroundSubtractorMOG2 bsmog;
+    private Mat fgMask;
+    private Mat kernel;
+    private Mat output;
+    private WritableImage writableImage;
+    private int nonZeroCount;
+    private boolean isFirstFrame;
     
     /**
      * Update output view after image processing.
@@ -180,7 +177,6 @@ public class OutputDisplayController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         fgMask = new Mat();
         output = new Mat();
-        contours = new ArrayList<>();
         
         kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(10, 10));
     }    

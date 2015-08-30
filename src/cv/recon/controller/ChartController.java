@@ -48,16 +48,16 @@ public class ChartController implements Initializable {
     @FXML
     private LineChart<Number, Number> lineChart;
     
-    OutputDisplayController outputController;
-    ObservableList<XYChart.Data<Number, Number>> nonZeroCountValues;
-    XYChart.Series<Number, Number> nonZeroCountSeries;
-    ObservableList<XYChart.Data<Number, Number>> meanValues;
-    XYChart.Series<Number, Number> meanSeries;
-    long startTime;
-    long elapsedTime;
-    long count;
-    Timer timer;
-    Position currentPosition;
+    private OutputDisplayController outputController;
+    private ObservableList<XYChart.Data<Number, Number>> nonZeroCountValues;
+    private XYChart.Series<Number, Number> nonZeroCountSeries;
+    private ObservableList<XYChart.Data<Number, Number>> meanValues;
+    private XYChart.Series<Number, Number> meanSeries;
+    private long startTime;
+    private long elapsedTime;
+    private long count;
+    private Timer timer;
+    private Position currentPosition;
     
     /**
      * Start timer to run a new thread that updates chart.
@@ -130,7 +130,8 @@ public class ChartController implements Initializable {
     
     /**
      * Check if there is a change in position according to mean value. If yes, 
-     * then it is considered a repetition, thus increasing the counter.
+     * then it is considered a repetition. The counter increased when the
+     * position changed from AWAY_FROM_INITIAL to CLOSE_TO_INITIAL.
      * 
      * @param mean Mean value
      */
@@ -149,8 +150,11 @@ public class ChartController implements Initializable {
         
         if (!currentPosition.equals(newPos)) {
             currentPosition = newPos;
-            count++;
-            countLabel.setText("" + count);
+            
+            if (currentPosition.equals(Position.CLOSE_TO_INITIAL)) {
+                count++;
+                countLabel.setText("" + count);
+            }
         }
     }
     

@@ -52,9 +52,9 @@ public class RootLayoutController implements Initializable {
     private OutputDisplayController outputController;
     private ChartController chartController;
     
-    VideoCapture vid;
-    Timer timer;
-    Mat src;
+    private VideoCapture vid;
+    private Timer timer;
+    private Mat src;
     
     /**
      * Called from Start button.
