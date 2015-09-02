@@ -51,8 +51,8 @@ public class ChartController implements Initializable {
     private OutputDisplayController outputController;
     private ObservableList<XYChart.Data<Number, Number>> nonZeroCountValues;
     private XYChart.Series<Number, Number> nonZeroCountSeries;
-    private ObservableList<XYChart.Data<Number, Number>> meanValues;
-    private XYChart.Series<Number, Number> meanSeries;
+    private ObservableList<XYChart.Data<Number, Number>> midRangeValues;
+    private XYChart.Series<Number, Number> midRangeSeries;
     private long startTime;
     private long elapsedTime;
     private long count;
@@ -103,7 +103,7 @@ public class ChartController implements Initializable {
         nonZeroCountValues.add(new XYChart.Data<>(elapsedTime, nonZeroCount));
         
         clearOldData();
-        calculateMean();
+        calculateMidRange();
     }
     
     /**
@@ -117,32 +117,32 @@ public class ChartController implements Initializable {
     }
     
     /**
-     * Calculate mean value and update the chart
+     * Calculate mid range value and update the chart
      */
-    private void calculateMean() {
+    private void calculateMidRange() {
         if (!nonZeroCountValues.isEmpty()) {
-            double mean = Math.mean(nonZeroCountValues);
+            double midRange = Math.midRange(nonZeroCountValues);
             
-            checkRepetition(mean);
-            setMeanOnChart(mean);
+            checkRepetition(midRange);
+            setMidRangeOnChart(midRange);
         }
     }
     
     /**
-     * Check if there is a change in position according to mean value. If yes, 
-     * then it is considered a repetition. The counter increased when the
+     * Check if there is a change in position according to mid range value. If 
+     * yes, then it is considered a repetition. The counter increased when the
      * position changed from AWAY_FROM_INITIAL to CLOSE_TO_INITIAL.
      * 
-     * @param mean Mean value
+     * @param midRange Mid range value
      */
-    private void checkRepetition(double mean) {
+    private void checkRepetition(double midRange) {
         double currentValue = nonZeroCountValues
                                 .get(nonZeroCountValues.size() - 1) // last position
                                 .getYValue()
                                 .doubleValue();
         
         Position newPos;
-        if (currentValue > mean) {
+        if (currentValue > midRange) {
             newPos = Position.AWAY_FROM_INITIAL;
         } else {
             newPos = Position.CLOSE_TO_INITIAL;
@@ -159,18 +159,18 @@ public class ChartController implements Initializable {
     }
     
     /**
-     * Add mean series on non-zero pixel count chart.
+     * Add mid range series on non-zero pixel count chart.
      * 
-     * @param mean Mean value
+     * @param midRange Mid range value
      */
-    private void setMeanOnChart(double mean) {
+    private void setMidRangeOnChart(double midRange) {
         Number start = nonZeroCountValues.get(0).getXValue();
             
-        if (meanValues.isEmpty()) {
-            meanValues.add(new XYChart.Data<>(start, mean));
+        if (midRangeValues.isEmpty()) {
+            midRangeValues.add(new XYChart.Data<>(start, midRange));
         } else {
             Number end = nonZeroCountValues.get(nonZeroCountValues.size() - 1).getXValue();
-            meanValues.setAll(new XYChart.Data<>(start, mean), new XYChart.Data<>(end, mean));
+            midRangeValues.setAll(new XYChart.Data<>(start, midRange), new XYChart.Data<>(end, midRange));
         }
     }
     
@@ -189,9 +189,9 @@ public class ChartController implements Initializable {
         nonZeroCountSeries = new XYChart.Series<>("Start point", nonZeroCountValues);
         lineChart.getData().add(nonZeroCountSeries);
         
-        meanValues = FXCollections.observableArrayList();
-        meanSeries = new XYChart.Series<>("Mean", meanValues);
-        lineChart.getData().add(meanSeries);
+        midRangeValues = FXCollections.observableArrayList();
+        midRangeSeries = new XYChart.Series<>("Mid range", midRangeValues);
+        lineChart.getData().add(midRangeSeries);
         
         xAxis.setForceZeroInRange(false);
     }    

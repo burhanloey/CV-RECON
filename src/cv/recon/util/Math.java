@@ -16,6 +16,7 @@
  */
 package cv.recon.util;
 
+import java.util.Iterator;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
@@ -26,6 +27,7 @@ import javafx.scene.chart.XYChart;
 public class Math {
     /**
      * Calculate mean value for a series in a chart
+     * 
      * @param list A list of values in a series
      * @return Mean value
      */
@@ -37,5 +39,37 @@ public class Math {
                 .reduce(sum, (accumulator, _item) -> accumulator + _item);
         
         return sum / list.size();
+    }
+    
+    /**
+     * Calculate mid range value for a given series
+     * 
+     * @param list A list of data in a series
+     * @return Mid range value
+     */
+    public static double midRange(ObservableList<XYChart.Data<Number, Number>> list) {
+        if (list == null || list.isEmpty()) {
+            return 0.0;
+        }
+        
+        double min, max;
+        min = max = list.get(0).getYValue().doubleValue();
+        
+        Iterator<XYChart.Data<Number, Number>> iterator = list.iterator();
+        iterator.next();    // skip first data
+        
+        while (iterator.hasNext()) {
+            XYChart.Data<Number, Number> data = iterator.next();
+            double value = data.getYValue().doubleValue();
+            
+            if (value < min) {
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+        }
+        
+        return (max + min) / 2;
     }
 }
